@@ -1,14 +1,11 @@
-import React from "react";
-import logo from "./logo.svg";
-import Navbar from "./components/Navbar";
 import DataContainer from "./components/DataContainer";
 
 function App() {
   return (
     <div className="App">
-      <Navbar />
       <div className="pt-1">
-      <section className="mt-4 d-flex justify-content-center">
+      <section className="mt-4">
+        <p className="h4 text-center mb-4">COVID-19 Dashboard 🦠</p>
         <DataContainer />
       </section>
       </div>
