@@ -10,21 +10,24 @@ import {
   TimeScale,
   TimeSeriesScale,
   Filler,
+  registerables as Registerables,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  TimeScale,
-  TimeSeriesScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+ChartJS.register(...Registerables);
+
+// ChartJS.register(
+//   CategoryScale,
+//   LinearScale,
+//   TimeScale,
+//   TimeSeriesScale,
+//   PointElement,
+//   LineElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+//   Filler
+// );
 
 type Props = {
   store: Record<string, any>;
