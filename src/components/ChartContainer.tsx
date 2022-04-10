@@ -1,33 +1,10 @@
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-  TimeSeriesScale,
-  Filler,
   registerables as Registerables,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 
 ChartJS.register(...Registerables);
-
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   TimeScale,
-//   TimeSeriesScale,
-//   PointElement,
-//   LineElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-//   Filler
-// );
 
 type Props = {
   store: Record<string, any>;
@@ -84,9 +61,6 @@ export default function ChartContainer({ mode, store }: Props) {
       },
     ],
   };
-  // show new cases worldwide
-  // display a filter for start and end dates, and to change the data being displayed.
-  // three statuses will be shown: confirmed cases, active cases and deaths
 
   return (
     <div className="col-sm-8 col-12 mb-1">
