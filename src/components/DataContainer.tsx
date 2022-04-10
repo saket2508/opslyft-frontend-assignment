@@ -1,8 +1,14 @@
 import * as React from "react";
-import Select from 'react-select';
+import Select from "react-select";
+import ReactCountryFlag from "react-country-flag";
 import ChartContainer from "./ChartContainer";
 
 export default function DataContainer() {
+  type chartKey = "newCases" | "newDeaths";
+  const legendTitles = {
+    'newCases': 'New Cases',
+    'newDeaths': 'New Deaths'
+  };
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const availablePageSizes = [10, 25, 50];
   const [currPage, setCurrPage] = React.useState<number>(1);
@@ -12,11 +18,15 @@ export default function DataContainer() {
   const [isSearching, setIsSearching] = React.useState<boolean>(false);
   const [search, setSearch] = React.useState<string>("");
   const [selectedCountry, setSelectedCountry] = React.useState<string>("India");
-  const [countryCodes, setCountryCodes] = React.useState<
+  const [countryCodes, setCountryCodes] = React.useState<Record<string, any>>(
+    {}
+  );
+  const [listCountries, setListCountries] = React.useState<Array<any>>([]);
+  const [countrySummary, setCountrySummary] = React.useState<
     Record<string, any>
   >({});
-  const [listCountries, setListCountries] = React.useState<Array<any>>([]);
-  const [countrySummary, setCountrySummary] = React.useState<Record<string, any>>({});
+  const chartKeys: chartKey[] = ["newCases", "newDeaths"];
+  const [timeSeriesKey, setTimeSeriesKey] = React.useState<chartKey>("newCases");
   const [timeSeriesData, setTimeSeriesData] = React.useState<
     Record<string, any>
   >({});
@@ -34,12 +44,16 @@ export default function DataContainer() {
 
   React.useEffect(() => {
     (async () => {
-      const timeSeriesData = await fetchTimeSeriesData(countryCodes[selectedCountry]['slug']);
-      const countrySummary = dataCountries.find((country: any) => country['Country'] === selectedCountry);
-      setTimeSeriesData(timeSeriesData);
+      const countrySummary = dataCountries.find(
+        (country: any) => country["Country"] === selectedCountry
+      );
       setCountrySummary(countrySummary);
+      const timeSeriesData = await fetchTimeSeriesData(
+        countryCodes[selectedCountry]["slug"]
+      );
+      setTimeSeriesData(timeSeriesData);
     })();
-  }, [selectedCountry])
+  }, [selectedCountry]);
 
   const fetchData = async () => {
     const codes = await fetchCountryCodes();
@@ -49,7 +63,9 @@ export default function DataContainer() {
     let countryOptions = sortedCountryNames.map((country) => {
       return { label: country, value: country };
     });
-    const countrySummary = sortedCountries.find((country: any) => country['Country'] === 'India');
+    const countrySummary = sortedCountries.find(
+      (country: any) => country["Country"] === "India"
+    );
     setListCountries(countryOptions);
     setCountryCodes(codes);
     setTimeSeriesData(timeSeriesData);
@@ -71,10 +87,10 @@ export default function DataContainer() {
     responseData.forEach((item: Record<string, string>) => {
       let name = item["Country"];
       let isoCode = item["ISO2"].toLowerCase();
-      let slug = item['Slug'];
+      let slug = item["Slug"];
       codes[name] = {
-        'iso':isoCode,
-        'slug': slug
+        iso: isoCode,
+        slug: slug,
       };
     });
     return codes;
@@ -114,7 +130,6 @@ export default function DataContainer() {
       timeSeriesData["newCases"][date] = newCases;
       timeSeriesData["newDeaths"][date] = newDeaths;
     }
-    console.log(timeSeriesData);
     return timeSeriesData;
   };
 
@@ -194,8 +209,7 @@ export default function DataContainer() {
       </div>
     );
   }
-
-  // fetch data from API and display chart and table here
+  
   return (
     <div className="d-flex flex-column align-items-center">
       <div className="mt-1 fixedWidth">
@@ -203,22 +217,76 @@ export default function DataContainer() {
           className="basic-single"
           classNamePrefix="select"
           options={listCountries}
-          defaultValue={listCountries.find(option => option['label'] === 'India')}
-          name='listCountries'
+          defaultValue={listCountries.find(
+            (option) => option.label === "India"
+          )}
+          formatOptionLabel={(option) => {
+            return (
+              <div className="d-flex align-items-center">
+                <span className="me-2">
+                  <ReactCountryFlag
+                    countryCode={countryCodes[option.label]["iso"]}
+                    svg
+                    style={{
+                      width: "1.6em",
+                      height: "1.6em",
+                    }}
+                    title={countryCodes[option.label]["iso"]}
+                  />
+                </span>
+                {option.label}
+              </div>
+            );
+          }}
+          name="listCountries"
           onChange={(option) => setSelectedCountry(option.label)}
         />
       </div>
-      <p className="semibold mt-4 mb-2 text-secondary text-center">
-        New Cases in {selectedCountry}
-        <span className="ms-2">
-          <img
-            src={`https://hatscripts.github.io/circle-flags/flags/${countryCodes[selectedCountry]['iso']}.svg`}
-            width="24"
-          />
-        </span>
-      </p>
-      <ChartContainer store={timeSeriesData} />
-      <div className="col-12 col-sm-10 px-2 mt-3">
+      <div className="mt-4 mb-3">
+        <div className="d-flex w-100">
+          <div className="d-flex flex-column align-items-center px-4 semibold confirmedText">
+            <small>Confirmed</small>
+            <p className="fw-bold">
+              {formatter.format(countrySummary["TotalConfirmed"])}
+            </p>
+          </div>
+          <div className="d-flex flex-column align-items-center px-4 semibold text-muted">
+            <small>Deceased</small>
+            <p className="fw-bold">
+              {formatter.format(countrySummary["TotalDeaths"])}
+            </p>
+          </div>
+          <div className="d-flex flex-column align-items-center px-4 semibold recoveredText">
+            <small>Recovered</small>
+            <p className="fw-bold">NA</p>
+          </div>
+        </div>
+      </div>
+      <div className="col-sm-8 col-12 mb-4 px-2">
+        {/* Show a small red dot here indicating the chart legend */}
+        <p className="h6 fw-bold">
+          {timeSeriesKey === 'newCases' ? 'Newly Reported Cases (Last 4 Months)' : 'Newly Reported Deaths (Last 4 Months)'}
+        </p>
+      </div>
+      <ChartContainer mode={timeSeriesKey} store={timeSeriesData} />
+      <div className="mb-2 d-flex">
+        {chartKeys.map((item, idx) =>
+          item === timeSeriesKey ? (
+            <span className="box-active" key={idx}>
+              <small>{legendTitles[item]}</small>
+            </span>
+          ) : (
+            <span
+              className="box"
+              key={idx}
+              onClick={() => setTimeSeriesKey(item)}
+            >
+              <small>{legendTitles[item]}</small>
+            </span>
+          )
+        )}
+      </div>
+      <div className="col-12 col-sm-10 px-2 mt-4">
         {/* Search */}
         <div className="mb-3">
           <input
@@ -237,11 +305,21 @@ export default function DataContainer() {
           <table className="table table-striped table-hover table-borderless">
             <thead className="table-secondary">
               <tr className="text-sm">
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Confirmed Cases</th>
-                <th scope="col">Deaths</th>
-                <th scope="col">Recovered</th>
+                <th scope="col">
+                  <small>#</small>
+                </th>
+                <th scope="col">
+                  <small>Name</small>
+                </th>
+                <th scope="col">
+                  <small>Confirmed</small>
+                </th>
+                <th scope="col">
+                  <small>Deceased</small>
+                </th>
+                <th scope="col">
+                  <small>Recovered</small>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -253,23 +331,26 @@ export default function DataContainer() {
                 </td>
                 <td>{formatter.format(worldSummary["TotalConfirmed"])}</td>
                 <td>{formatter.format(worldSummary["TotalDeaths"])}</td>
-                <td>{formatter.format(worldSummary["TotalRecovered"])}</td>
+                <td>NA</td>
               </tr>
               {tabularData.length > 0 ? (
                 tabularData.map((row: any, idx) => {
                   return (
                     <tr key={idx}>
-                      <th scope="row">
+                      <th scope="row" className="align-middle">
                         {isSearching ? idx + 1 : idx + startIndex}
                       </th>
                       <td>
                         <div className="d-flex align-items-center">
                           <span className="me-2">
-                            <img
-                              src={`https://hatscripts.github.io/circle-flags/flags/${row[
-                                "CountryCode"
-                              ].toLowerCase()}.svg`}
-                              width="24"
+                            <ReactCountryFlag
+                              countryCode={row["CountryCode"]}
+                              svg
+                              style={{
+                                width: "1.6em",
+                                height: "1.6em",
+                              }}
+                              title={row["CountryCode"]}
                             />
                           </span>
                           {row["Country"]}
@@ -277,7 +358,7 @@ export default function DataContainer() {
                       </td>
                       <td>{formatter.format(row["TotalConfirmed"])}</td>
                       <td>{formatter.format(row["TotalDeaths"])}</td>
-                      <td>{formatter.format(row["TotalRecovered"])}</td>
+                      <td>NA</td>
                     </tr>
                   );
                 })

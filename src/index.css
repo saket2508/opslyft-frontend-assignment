@@ -8,6 +8,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.confirmedText {
+  color: rgb(248 113 113);
+}
+
+.recoveredText {
+  color: rgb(74 222 128);
+}
+
+.deceasedText {
+  color: rgb(108, 117, 125);
+}
+
+.legendCases {
+  height: 14px;
+  width: 14px;
+  background-color: rgb(248 113 113);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.4em;
+}
+
+.legendDeaths {
+  height: 14px;
+  width: 14px;
+  background-color: rgb(108, 117, 125);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.4em;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -19,4 +49,31 @@ code {
 
 .fixedWidth {
   width: 300px;
+}
+
+.heading {
+  letter-spacing: 0.025em;
+}
+
+.box-active {
+  border: 1px solid rgb(217, 217, 217);
+  background-color: white;
+  font-weight: 600;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  padding-top: 10px;
+  padding-left: 15px;
+  padding-bottom: 8px;
+  padding-right: 15px;
+}
+
+.box{
+  border: 1px solid rgb(217, 217, 217);
+  background-color: rgb(242, 242, 242);
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  padding-top: 10px;
+  padding-left: 15px;
+  padding-bottom: 8px;
+  padding-right: 15px;
 }

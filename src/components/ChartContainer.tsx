@@ -9,6 +9,7 @@ import {
   Legend,
   TimeScale,
   TimeSeriesScale,
+  Filler,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 
@@ -21,11 +22,28 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 type Props = {
   store: Record<string, any>;
+  mode: "newCases" | "newDeaths";
+};
+
+const chartColorOptions = {
+  newCases: {
+    label: "New Cases",
+    borderColor: "rgb(248, 113, 113)",
+    backgroundColor: "rgba(248, 113, 113, 0.2)",
+    fill: true,
+  },
+  newDeaths: {
+    label: "New Deaths",
+    borderColor: "rgb(108, 117, 125)",
+    backgroundColor: "rgba(108, 117, 125, 0.2)",
+    fill: true,
+  },
 };
 
 const dateFormatter = (dateStr: string) => {
@@ -34,7 +52,7 @@ const dateFormatter = (dateStr: string) => {
   return formattedDate;
 };
 
-export default function ChartContainer({ store }: Props) {
+export default function ChartContainer({ mode, store }: Props) {
   const options = {
     responsive: true,
     plugins: {
@@ -45,20 +63,21 @@ export default function ChartContainer({ store }: Props) {
     },
   };
 
-  const chartData = Object.keys(store["newCases"]).map((key) => {
+  const chartData = Object.keys(store[mode]).map((item) => {
     return {
-      x: dateFormatter(key),
-      y: store["newCases"][key],
+      x: dateFormatter(item),
+      y: store[mode][item],
     };
   });
 
   const data = {
     datasets: [
       {
-        label: "New Cases",
+        label: chartColorOptions[mode]["label"],
         data: chartData,
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(255, 99, 132, 0.5)",
+        borderColor: chartColorOptions[mode]["borderColor"],
+        backgroundColor: chartColorOptions[mode]["backgroundColor"],
+        fill: true,
       },
     ],
   };
@@ -67,7 +86,7 @@ export default function ChartContainer({ store }: Props) {
   // three statuses will be shown: confirmed cases, active cases and deaths
 
   return (
-    <div className="col-sm-8 col-12 mb-3">
+    <div className="col-sm-8 col-12 mb-1">
       <Chart type="line" options={options} data={data} />
     </div>
   );
