@@ -1,11 +1,17 @@
-### How I am going to complete this assignment
+## Opslyft Frontend Assignment
 
-- Get started with the frontend work. You can use the same styles/interface layout in your OG covid tracker app. Use only bootstrap CDN and your own CSS styles for the UI.
+- This repo contains the source code for the task that was given as part of Opslyft's frontend-intern assignment.
 
-- Fetch Data from the API and show a table of countries with the covid numbers.
+- A COVID-19 Tracker/Dashboard app had to be built that shows the latest covid-19 virus cases around the world.
 
-- Use chart js for designing the timeline charts.
+- The UI has a table of all countries with their respective covid stats and a chart tracking the rise in cases and deaths in the last four months. You can also see a summary of covid figures at the top.
 
-- If you have time, create a simple node/express app that stores data from the API in a MySQL database(use node-mysql package for connecting to the DB). 
 
-- It will refresh covid data in the DB only once every 24 hours, that is send a request to the API for the updated numbers
+### Screenshots
+
+<img src="src/assets/screenshot-1.jpeg"/>
+<br/> 
+<img src="src/assets/screenshot-2.jpeg"/>
+<br/>
+
+

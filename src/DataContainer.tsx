@@ -61,11 +61,15 @@ export default function DataContainer() {
       const countrySummary = dataCountries.find(
         (country: any) => country["Country"] === selectedCountry
       );
-      setCountrySummary(countrySummary);
+      if(countrySummary) {
+        setCountrySummary(countrySummary);
+      }
       const timeSeriesData = await fetchTimeSeriesData(
         countryCodes[selectedCountry]["slug"]
       );
-      setTimeSeriesData(timeSeriesData);
+      if(Object.keys(timeSeriesData).length !== 0) {
+        setTimeSeriesData(timeSeriesData);
+      }
     })();
   }, [selectedCountry]);
 
@@ -172,7 +176,7 @@ export default function DataContainer() {
             <p className="fw-bold mb-0">
               {formatter.format(countrySummary["TotalConfirmed"])}
             </p>
-            {countrySummary["NewConfirmed"] && (
+            {countrySummary["NewConfirmed"] > 0 && (
               <small>
                 + {formatter.format(countrySummary["NewConfirmed"])}
               </small>
@@ -183,7 +187,7 @@ export default function DataContainer() {
             <p className="fw-bold mb-0">
               {formatter.format(countrySummary["TotalDeaths"])}
             </p>
-            {countrySummary["NewDeaths"] && (
+            {countrySummary["NewDeaths"] > 0 && (
               <small>+ {formatter.format(countrySummary["NewDeaths"])}</small>
             )}
           </div>
