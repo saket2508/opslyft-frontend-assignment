@@ -38,12 +38,9 @@ export default function TableCountries(props: {
               <span className="me-2">🌎</span>
               World
             </td>
-            <td>
-              {formatter.format(worldSummary["TotalConfirmed"])}
-              {worldSummary[""]}
-            </td>
-            <td>{formatter.format(worldSummary["TotalDeaths"])}</td>
-            <td>NA</td>
+            <td>{formatter.format(worldSummary["confirmed"])}</td>
+            <td>{formatter.format(worldSummary["deaths"])}</td>
+            <td>{formatter.format(worldSummary["recovered"])}</td>
           </tr>
           {tabularData.length > 0 ? (
             tabularData.map((row: any, idx) => {
@@ -55,22 +52,14 @@ export default function TableCountries(props: {
                   <td>
                     <div className="d-flex align-items-center">
                       <span className="me-2">
-                        <ReactCountryFlag
-                          countryCode={row["CountryCode"]}
-                          svg
-                          style={{
-                            width: "1.6em",
-                            height: "1.6em",
-                          }}
-                          title={row["CountryCode"]}
-                        />
+                        <img src={row['flagImg']} className='circularAvatar'/>
                       </span>
-                      {row["Country"]}
+                      {row["name"]}
                     </div>
                   </td>
                   <td>
-                    {formatter.format(row["TotalConfirmed"])}
-                    {row["NewConfirmed"] > 0 && (
+                    {formatter.format(row["confirmed"])}
+                    {row["newCases"] > 0 && (
                       <small>
                         <span
                           className="badge rounded-pill bg-danger ms-1"
@@ -79,14 +68,14 @@ export default function TableCountries(props: {
                             paddingRight: "0.4em",
                           }}
                         >
-                          + {formatter.format(row["NewConfirmed"])}
+                          + {formatter.format(row["newCases"])}
                         </span>
                       </small>
                     )}
                   </td>
                   <td>
-                    {formatter.format(row["TotalDeaths"])}
-                    {row["NewDeaths"] > 0 && (
+                    {formatter.format(row["deaths"])}
+                    {row["newDeaths"] > 0 && (
                       <small>
                         <span
                           className="badge rounded-pill bg-secondary ms-1"
@@ -95,12 +84,12 @@ export default function TableCountries(props: {
                             paddingRight: "0.4em",
                           }}
                         >
-                          + {formatter.format(row["NewDeaths"])}
+                          + {formatter.format(row["newDeaths"])}
                         </span>
                       </small>
                     )}
                   </td>
-                  <td>NA</td>
+                  <td>{formatter.format(row["recovered"])}</td>
                 </tr>
               );
             })

@@ -8,13 +8,11 @@ const chartColorOptions = {
     label: "New Cases",
     borderColor: "rgb(248, 113, 113)",
     backgroundColor: "rgba(248, 113, 113, 0.2)",
-    fill: true,
   },
   newDeaths: {
     label: "New Deaths",
     borderColor: "rgb(108, 117, 125)",
     backgroundColor: "rgba(108, 117, 125, 0.2)",
-    fill: true,
   },
 };
 

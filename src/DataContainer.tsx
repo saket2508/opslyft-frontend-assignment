@@ -3,9 +3,9 @@ import ChartContainer from "./components/ChartContainer";
 import TableCountries from "./components/TableCountries";
 import PaginationControl from "./components/PaginationControl";
 import {
-  fetchCountryCodes,
-  fetchTabularData,
+  fetchCountries,
   fetchTimeSeriesData,
+  fetchWorldData,
 } from "./helper";
 import SummaryStats from "./components/SummaryStats";
 import SearchBar from "./components/SearchBar";
@@ -59,45 +59,44 @@ export default function DataContainer() {
 
   React.useEffect(() => {
     (async () => {
-      const countrySummary = dataCountries.find(
-        (country: any) => country["Country"] === selectedCountry
-      );
-      if (countrySummary) {
+      try {
+        const countrySummary = dataCountries.find(
+          (country: any) => country["name"] === selectedCountry
+        );
         setCountrySummary(countrySummary);
-      }
-      const timeSeriesData = await fetchTimeSeriesData(
-        countryCodes[selectedCountry]["slug"]
-      );
-      if (Object.keys(timeSeriesData).length !== 0) {
+        const timeSeriesData = await fetchTimeSeriesData(
+          countryCodes[selectedCountry]
+        );
         setTimeSeriesData(timeSeriesData);
+      } catch (error) {
+        console.error('Could not get time series data');
       }
     })();
   }, [selectedCountry]);
 
   const fetchData = async () => {
-    const codes = await fetchCountryCodes();
-    const { sortedCountries, globalData, updatedTimeStamp } =
-      await fetchTabularData();
+    const { dataCountries } = await fetchCountries();
+    const { worldData, updatedTimeStamp } = await fetchWorldData();
     const timeSeriesData = await fetchTimeSeriesData();
-    let listCountries: string[] = sortedCountries.map(
-      (data: Record<string, any>) => data["Country"]
-    );
+    const listCountries: Array<string> = [];
+    const codes: Record<string, string> = {};
+    dataCountries.forEach((countryObj: any) => {
+      let countryName = countryObj['name'];
+      let countryCode = countryObj['iso'];
+      listCountries.push(countryName);
+      codes[countryName] = countryCode;
+    });
     listCountries.sort();
-    const countrySummary = sortedCountries.find(
-      (country: any) => country["Country"] === "India"
-    );
-    setUpdatedTimeStamp(updatedTimeStamp);
-    setListCountries(listCountries);
-    setCountryCodes(codes);
+    const countrySummary = dataCountries.find((country: any) => country['name'] === 'India');
+    const tabularData = dataCountries.slice(startIndex - 1, currPage * pageSize);
     setTimeSeriesData(timeSeriesData);
-    setWorldSummary(globalData);
-    setDataCountries(sortedCountries);
+    setWorldSummary(worldData);
     setCountrySummary(countrySummary);
-    const initialData = sortedCountries.slice(
-      startIndex - 1,
-      currPage * pageSize
-    );
-    setTabularData(initialData);
+    setTabularData(tabularData);
+    setListCountries(listCountries);
+    setDataCountries(dataCountries);
+    setUpdatedTimeStamp(updatedTimeStamp);
+    setCountryCodes(codes);
     setIsLoading(false);
   };
 
@@ -163,7 +162,7 @@ export default function DataContainer() {
       setIsSearching(true);
     }
     const records = dataCountries.filter((e) =>
-      e["Country"].toLowerCase().includes(query.toLowerCase())
+      e["name"].toLowerCase().includes(query.toLowerCase())
     );
     setTabularData(records);
   };
@@ -211,13 +210,13 @@ export default function DataContainer() {
       <small className="text-secondary semibold mb-3">
         Updated {getLastUpdatedDate()}
       </small>
-      <SearchBar listCountries={listCountries} selectCountry={selectCountry} />
+      <SearchBar listCountries={listCountries} selectCountry={selectCountry} selectedCountry={selectedCountry}/>
       <SummaryStats countrySummary={countrySummary} formatter={formatter} />
       <div className="col-sm-8 col-12 mb-4 px-2">
         <p className="h6 fw-bold">
           {timeSeriesKey === "newCases"
-            ? "Newly Reported Cases (Last 4 Months)"
-            : "Newly Reported Deaths (Last 4 Months)"}
+            ? "Newly Reported Cases (Last 3 Months)"
+            : "Newly Reported Deaths (Last 3 Months)"}
         </p>
       </div>
       <ChartContainer mode={timeSeriesKey} store={timeSeriesData} />

@@ -1,69 +1,69 @@
-export const fetchCountryCodes = async (): Promise<Record<string, any>> => {
-  const res = await fetch("https://api.covid19api.com/countries");
-  const responseData = await res.json();
-  const codes: Record<string, any> = {};
-  responseData.forEach((item: Record<string, string>) => {
-    let name = item["Country"];
-    let isoCode = item["ISO2"].toLowerCase();
-    let slug = item["Slug"];
-    codes[name] = {
-      iso: isoCode,
-      slug: slug,
-    };
-  });
-  return codes;
-};
+export const fetchGeolocation = async(): Promise<string> => {
+  return 'India';
+}
 
-export const fetchTabularData = async (): Promise<Record<string, any>> => {
-  const res = await fetch("https://api.covid19api.com/summary");
-  const reponseData = await res.json();
-  const globalData = reponseData["Global"];
-  const dataCountries: Array<any> = reponseData["Countries"];
-  const sortedCountries = dataCountries.sort(
-    (a, b) => b["TotalConfirmed"] - a["TotalConfirmed"]
-  );
-  const updatedTimeStamp = reponseData["Date"];
-  return { sortedCountries, globalData, updatedTimeStamp };
+export const fetchWorldData = async(): Promise<Record<string, any>> => {
+  const res = await fetch("https://disease.sh/v3/covid-19/all");
+  const responseData = await res.json();
+  const worldData = {
+    'confirmed': responseData['cases'],
+    'deaths': responseData['deaths'],  
+    'recovered': responseData['recovered'],  
+  }
+  const updatedTimeStamp = responseData['updated'];
+  return { worldData, updatedTimeStamp };
+}
+
+export const fetchCountries = async (): Promise<Record<string, any>> => {
+  const res = await fetch("https://disease.sh/v3/covid-19/countries");
+  const responseData: Array<Record<string, any>> = await res.json();
+  const getCountryName = (name: string) => {
+    if(name === 'USA') {
+      return 'United States of America';
+    } else if(name === 'UK') {
+      return 'United Kingdom';
+    } else if(name === 'S. Korea') {
+      return 'South Korea';
+    } else {
+      return name;
+    }
+  }
+  const parsedData = responseData.map((item: any) => ({ 
+    'name': getCountryName(item['country']),
+    'confirmed': item['cases'],
+    'newCases': item['todayCases'],
+    'deaths': item['deaths'],
+    'newDeaths': item['todayDeaths'],
+    'recovered': item['recovered'],
+    'iso': item['countryInfo']['iso2'],
+    'flagImg': item['countryInfo']['flag']
+  }))
+  const descSortedData = parsedData.sort((a, b) => b['confirmed'] - a['confirmed']);
+  return { dataCountries: descSortedData };
 };
 
 export const fetchTimeSeriesData = async (
-  country?: string
+  countryCode?: string
 ): Promise<Record<string, any>> => {
-  const res = country
-    ? await fetch(`https://api.covid19api.com/dayone/country/${country}`)
-    : await fetch("https://api.covid19api.com/dayone/country/india");
-  const responseData: Array<any> = await res.json();
-  const size = responseData.length;
-  // Get data from the last four months
+  const res = countryCode
+    ? await fetch(`https://disease.sh/v3/covid-19/historical/${countryCode}?lastdays=91`)
+    : await fetch(`https://disease.sh/v3/covid-19/historical/in?lastdays=91`);
+  const responseData: Record<string, any> = await res.json();
+  // Get data from the last three months
   const timeSeriesData: Record<string, any> = {
     newCases: {},
     newDeaths: {},
   };
-  if (size === 0) {
-    return {};
-  }
-  if (size < 122) {
-    for (let i = 1; i < responseData.length; i++) {
-      let newCases =
-        responseData[i]["Confirmed"] -
-        responseData[i - 1]["Confirmed"];
-      let newDeaths =
-        responseData[i]["Deaths"] - responseData[i - 1]["Deaths"];
-      let date = responseData[i]["Date"];
-      timeSeriesData["newCases"][date] = newCases;
-      timeSeriesData["newDeaths"][date] = newDeaths;
-    }
-  } else {
-    for (let i = 122; i >= 1; i -= 1) {
-      let newCases =
-        responseData[size - i]["Confirmed"] -
-        responseData[size - i - 1]["Confirmed"];
-      let newDeaths =
-        responseData[size - i]["Deaths"] - responseData[size - i - 1]["Deaths"];
-      let date = responseData[size - i]["Date"];
-      timeSeriesData["newCases"][date] = newCases;
-      timeSeriesData["newDeaths"][date] = newDeaths;
-    }
+  const casesData = responseData['timeline']['cases'];
+  const deathsData = responseData['timeline']['deaths'];
+  let dates = Object.keys(casesData);
+  for(let i = 1; i < dates.length; i++) {
+    const currDate = dates[i];
+    const prevDate = dates[i-1];
+    const newCases = casesData[currDate] - casesData[prevDate];
+    const newDeaths = deathsData[currDate] - deathsData[prevDate];
+    timeSeriesData['newCases'][currDate] = newCases;
+    timeSeriesData['newDeaths'][currDate] = newDeaths;
   }
   return timeSeriesData;
 };

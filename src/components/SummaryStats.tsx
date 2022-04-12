@@ -9,24 +9,24 @@ export default function SummaryStats(props: {
         <div className="d-flex flex-column align-items-center px-4 semibold confirmedText">
           <small>Confirmed</small>
           <p className="fw-bold mb-0">
-            {formatter.format(countrySummary["TotalConfirmed"])}
+            {formatter.format(countrySummary["confirmed"])}
           </p>
           {countrySummary["NewConfirmed"] > 0 && (
-            <small>+ {formatter.format(countrySummary["NewConfirmed"])}</small>
+            <small>+ {formatter.format(countrySummary["newCases"])}</small>
           )}
         </div>
         <div className="d-flex flex-column align-items-center px-4 semibold text-muted">
           <small>Deceased</small>
           <p className="fw-bold mb-0">
-            {formatter.format(countrySummary["TotalDeaths"])}
+            {formatter.format(countrySummary["deaths"])}
           </p>
           {countrySummary["NewDeaths"] > 0 && (
-            <small>+ {formatter.format(countrySummary["NewDeaths"])}</small>
+            <small>+ {formatter.format(countrySummary["newDeaths"])}</small>
           )}
         </div>
         <div className="d-flex flex-column align-items-center px-4 semibold recoveredText">
           <small>Recovered</small>
-          <p className="fw-bold">NA</p>
+          <p className="fw-bold">{formatter.format(countrySummary["recovered"])}</p>
         </div>
       </div>
     </div>

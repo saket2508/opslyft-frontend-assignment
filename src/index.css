@@ -51,9 +51,27 @@ code {
   width: 300px;
 }
 
+.searchBar {
+  width: 300px;
+  position: relative;
+}
+
+.optionsContainer {
+  width: 100%;
+  position: absolute;
+  top: 5;
+  left: 0;
+}
 
 .heading {
   letter-spacing: 0.025em;
+}
+
+.circularAvatar {
+  height: 28px;
+  width: 28px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .box-active {

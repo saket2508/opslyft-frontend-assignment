@@ -30,8 +30,9 @@ const Suggestions = (props: {
 export default function SearchBar(props: {
   listCountries: Array<string>;
   selectCountry: (countryOption: string) => void;
+  selectedCountry: string;
 }) {
-  const { listCountries, selectCountry } = props;
+  const { listCountries, selectCountry, selectedCountry } = props;
   const [isSearching, setIsSeatching] = React.useState<boolean>(false);
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [listFiltered, setListFiltered] = React.useState<Array<string>>([
@@ -62,20 +63,22 @@ export default function SearchBar(props: {
   };
 
   return (
-    <div className="mt-1">
+    <div className="mt-1 searchBar">
       <input
         value={searchQuery}
         className="form-control fixedWidth rounded-pill"
         type={"text"}
-        placeholder="India"
+        placeholder={selectedCountry}
         aria-label="Search"
         onChange={handleChange}
       />
-      <Suggestions
-        items={listFiltered}
-        isSearching={isSearching}
-        handleSelect={handleSelect}
-      />
+      <div className="optionsContainer">
+        <Suggestions
+          items={listFiltered}
+          isSearching={isSearching}
+          handleSelect={handleSelect}
+        />
+      </div>
     </div>
   );
 }
