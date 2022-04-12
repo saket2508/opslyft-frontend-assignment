@@ -4,6 +4,7 @@ import TableCountries from "./components/TableCountries";
 import PaginationControl from "./components/PaginationControl";
 import {
   fetchCountries,
+  fetchGeolocation,
   fetchTimeSeriesData,
   fetchWorldData,
 } from "./helper";
@@ -25,10 +26,7 @@ export default function DataContainer() {
   const [pageSize, setPageSize] = React.useState<number>(10);
   const [isSearching, setIsSearching] = React.useState<boolean>(false);
   const [search, setSearch] = React.useState<string>("");
-  const [selectedCountry, setSelectedCountry] = React.useState<string>("India");
-  const [countryCodes, setCountryCodes] = React.useState<Record<string, any>>(
-    {}
-  );
+  const [selectedCountry, setSelectedCountry] = React.useState<string>('');
   const [listCountries, setListCountries] = React.useState<Array<string>>([]);
   const [countrySummary, setCountrySummary] = React.useState<
     Record<string, any>
@@ -58,14 +56,18 @@ export default function DataContainer() {
   }, []);
 
   React.useEffect(() => {
+    if(isLoading) {
+      return;
+    }
     (async () => {
       try {
         const countrySummary = dataCountries.find(
           (country: any) => country["name"] === selectedCountry
         );
         setCountrySummary(countrySummary);
+        const countryCode = countrySummary['iso'];
         const timeSeriesData = await fetchTimeSeriesData(
-          countryCodes[selectedCountry]
+          countryCode
         );
         setTimeSeriesData(timeSeriesData);
       } catch (error) {
@@ -77,18 +79,18 @@ export default function DataContainer() {
   const fetchData = async () => {
     const { dataCountries } = await fetchCountries();
     const { worldData, updatedTimeStamp } = await fetchWorldData();
-    const timeSeriesData = await fetchTimeSeriesData();
+    const userCountry = await fetchGeolocation();
+    const timeSeriesData = await fetchTimeSeriesData(userCountry);
     const listCountries: Array<string> = [];
-    const codes: Record<string, string> = {};
     dataCountries.forEach((countryObj: any) => {
       let countryName = countryObj['name'];
       let countryCode = countryObj['iso'];
       listCountries.push(countryName);
-      codes[countryName] = countryCode;
     });
     listCountries.sort();
-    const countrySummary = dataCountries.find((country: any) => country['name'] === 'India');
+    const countrySummary = dataCountries.find((country: any) => country['iso'] === userCountry);
     const tabularData = dataCountries.slice(startIndex - 1, currPage * pageSize);
+    setSelectedCountry(countrySummary['name']);
     setTimeSeriesData(timeSeriesData);
     setWorldSummary(worldData);
     setCountrySummary(countrySummary);
@@ -96,7 +98,6 @@ export default function DataContainer() {
     setListCountries(listCountries);
     setDataCountries(dataCountries);
     setUpdatedTimeStamp(updatedTimeStamp);
-    setCountryCodes(codes);
     setIsLoading(false);
   };
 

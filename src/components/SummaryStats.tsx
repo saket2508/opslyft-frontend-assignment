@@ -11,7 +11,7 @@ export default function SummaryStats(props: {
           <p className="fw-bold mb-0">
             {formatter.format(countrySummary["confirmed"])}
           </p>
-          {countrySummary["NewConfirmed"] > 0 && (
+          {countrySummary["newCases"] > 0 && (
             <small>+ {formatter.format(countrySummary["newCases"])}</small>
           )}
         </div>
@@ -20,7 +20,7 @@ export default function SummaryStats(props: {
           <p className="fw-bold mb-0">
             {formatter.format(countrySummary["deaths"])}
           </p>
-          {countrySummary["NewDeaths"] > 0 && (
+          {countrySummary["newCases"] > 0 && (
             <small>+ {formatter.format(countrySummary["newDeaths"])}</small>
           )}
         </div>

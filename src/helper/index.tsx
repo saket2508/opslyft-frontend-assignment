@@ -1,5 +1,16 @@
+import { timezones } from "./timezones";
+
 export const fetchGeolocation = async(): Promise<string> => {
-  return 'India';
+  // logic for fetching user country
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if(!userTimezone || userTimezone === null) {
+    return 'US';
+  }
+  const countryCode = timezones[userTimezone].c[0];
+  if(countryCode) {
+    return countryCode;
+  }
+  return 'US';
 }
 
 export const fetchWorldData = async(): Promise<Record<string, any>> => {

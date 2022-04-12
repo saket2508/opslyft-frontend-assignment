@@ -1,5 +1,3 @@
-import ReactCountryFlag from "react-country-flag";
-
 export default function TableCountries(props: {
   isSearching: boolean;
   worldSummary: Record<string, any>;
