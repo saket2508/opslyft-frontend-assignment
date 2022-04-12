@@ -1,13 +1,14 @@
 import * as React from "react";
-import Select from "react-select";
-import ReactCountryFlag from "react-country-flag";
 import ChartContainer from "./components/ChartContainer";
 import TableCountries from "./components/TableCountries";
+import PaginationControl from "./components/PaginationControl";
 import {
   fetchCountryCodes,
   fetchTabularData,
   fetchTimeSeriesData,
 } from "./helper";
+import SummaryStats from "./components/SummaryStats";
+import SearchBar from "./components/SearchBar";
 
 export default function DataContainer() {
   type chartKey = "newCases" | "newDeaths";
@@ -28,7 +29,7 @@ export default function DataContainer() {
   const [countryCodes, setCountryCodes] = React.useState<Record<string, any>>(
     {}
   );
-  const [listCountries, setListCountries] = React.useState<Array<any>>([]);
+  const [listCountries, setListCountries] = React.useState<Array<string>>([]);
   const [countrySummary, setCountrySummary] = React.useState<
     Record<string, any>
   >({});
@@ -61,13 +62,13 @@ export default function DataContainer() {
       const countrySummary = dataCountries.find(
         (country: any) => country["Country"] === selectedCountry
       );
-      if(countrySummary) {
+      if (countrySummary) {
         setCountrySummary(countrySummary);
       }
       const timeSeriesData = await fetchTimeSeriesData(
         countryCodes[selectedCountry]["slug"]
       );
-      if(Object.keys(timeSeriesData).length !== 0) {
+      if (Object.keys(timeSeriesData).length !== 0) {
         setTimeSeriesData(timeSeriesData);
       }
     })();
@@ -78,15 +79,15 @@ export default function DataContainer() {
     const { sortedCountries, globalData, updatedTimeStamp } =
       await fetchTabularData();
     const timeSeriesData = await fetchTimeSeriesData();
-    let sortedCountryNames = Object.keys(codes).sort();
-    let countryOptions = sortedCountryNames.map((country) => {
-      return { label: country, value: country };
-    });
+    let listCountries: string[] = sortedCountries.map(
+      (data: Record<string, any>) => data["Country"]
+    );
+    listCountries.sort();
     const countrySummary = sortedCountries.find(
       (country: any) => country["Country"] === "India"
     );
     setUpdatedTimeStamp(updatedTimeStamp);
-    setListCountries(countryOptions);
+    setListCountries(listCountries);
     setCountryCodes(codes);
     setTimeSeriesData(timeSeriesData);
     setWorldSummary(globalData);
@@ -167,39 +168,6 @@ export default function DataContainer() {
     setTabularData(records);
   };
 
-  function StatsSummary() {
-    return (
-      <div className="mt-4 mb-3">
-        <div className="d-flex w-100">
-          <div className="d-flex flex-column align-items-center px-4 semibold confirmedText">
-            <small>Confirmed</small>
-            <p className="fw-bold mb-0">
-              {formatter.format(countrySummary["TotalConfirmed"])}
-            </p>
-            {countrySummary["NewConfirmed"] > 0 && (
-              <small>
-                + {formatter.format(countrySummary["NewConfirmed"])}
-              </small>
-            )}
-          </div>
-          <div className="d-flex flex-column align-items-center px-4 semibold text-muted">
-            <small>Deceased</small>
-            <p className="fw-bold mb-0">
-              {formatter.format(countrySummary["TotalDeaths"])}
-            </p>
-            {countrySummary["NewDeaths"] > 0 && (
-              <small>+ {formatter.format(countrySummary["NewDeaths"])}</small>
-            )}
-          </div>
-          <div className="d-flex flex-column align-items-center px-4 semibold recoveredText">
-            <small>Recovered</small>
-            <p className="fw-bold">NA</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   function getLastUpdatedDate() {
     let updatedDate = new Date(updatedTimeStamp).toDateString();
     let sub = updatedDate.split(" ");
@@ -207,78 +175,6 @@ export default function DataContainer() {
     let formattedDate =
       formattedStr[0] + " " + formattedStr[1] + ", " + formattedStr[2];
     return formattedDate;
-  }
-
-  function PaginationControl() {
-    return (
-      <div className="mt-1 pb-3 d-flex justify-content-end semibold">
-        <small className="me-3 d-flex">
-          <span onClick={() => handlePageChange(currPage - 1)}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              fill="currentColor"
-              className="bi bi-chevron-left"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fillRule="evenodd"
-                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
-              />
-            </svg>
-          </span>
-          <p className="px-1">
-            {startIndex} - {endIndex} of {dataCountries.length}
-          </p>
-          <span onClick={() => handlePageChange(currPage + 1)}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              fill="currentColor"
-              className="bi bi-chevron-right"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-              />
-            </svg>
-          </span>
-        </small>
-        <div className="d-flex">
-          <small className="text-sm semibold">Rows per page:</small>
-          <span className="ms-2">
-            <div className="dropdown" style={{ marginTop: "-4px" }}>
-              <button
-                className="btn btn-sm btn-outline-dark dropdown-toggle rounded-pill"
-                type="button"
-                id="dropdownMenuButton1"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                {pageSize}
-              </button>
-              <ul
-                className="dropdown-menu"
-                aria-labelledby="dropdownMenuButton1"
-              >
-                {availablePageSizes.map((size, idx) => (
-                  <li
-                    className="dropdown-item"
-                    key={idx}
-                    onClick={() => handlePageSizeChange(size)}
-                  >
-                    <span>{size}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </span>
-        </div>
-      </div>
-    );
   }
 
   const formatter = new Intl.NumberFormat("en-US");
@@ -296,52 +192,27 @@ export default function DataContainer() {
     );
   }
 
-  if(error) {
+  if (error) {
     return (
       <div className="mt-3 text-center">
         <small className="text-danger semibold">
           Error getting data from the server
         </small>
       </div>
-    )
+    );
   }
+
+  const selectCountry = (countryOption: string) => {
+    setSelectedCountry(countryOption);
+  };
 
   return (
     <div className="d-flex flex-column align-items-center">
       <small className="text-secondary semibold mb-3">
         Updated {getLastUpdatedDate()}
       </small>
-      <div className="mt-1 fixedWidth">
-        <Select
-          className="basic-single"
-          classNamePrefix="select"
-          options={listCountries}
-          defaultValue={listCountries.find(
-            (option) => option.label === "India"
-          )}
-          formatOptionLabel={(option) => {
-            return (
-              <div className="d-flex align-items-center">
-                <span className="me-2">
-                  <ReactCountryFlag
-                    countryCode={countryCodes[option.label]["iso"]}
-                    svg
-                    style={{
-                      width: "1.6em",
-                      height: "1.6em",
-                    }}
-                    title={countryCodes[option.label]["iso"]}
-                  />
-                </span>
-                {option.label}
-              </div>
-            );
-          }}
-          name="listCountries"
-          onChange={(option) => setSelectedCountry(option.label)}
-        />
-      </div>
-      <StatsSummary />
+      <SearchBar listCountries={listCountries} selectCountry={selectCountry} />
+      <SummaryStats countrySummary={countrySummary} formatter={formatter} />
       <div className="col-sm-8 col-12 mb-4 px-2">
         <p className="h6 fw-bold">
           {timeSeriesKey === "newCases"
@@ -388,7 +259,16 @@ export default function DataContainer() {
           formatter={formatter}
           startIndex={startIndex}
         />
-        <PaginationControl />
+        <PaginationControl
+          currPage={currPage}
+          totalItems={dataCountries.length}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          currSize={pageSize}
+          availableSizes={availablePageSizes}
+          handlePageChange={handlePageChange}
+          handlePageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   );

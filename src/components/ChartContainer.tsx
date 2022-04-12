@@ -1,15 +1,7 @@
-import {
-  Chart as ChartJS,
-  registerables as Registerables,
-} from "chart.js";
+import { Chart as ChartJS, registerables as Registerables } from "chart.js";
 import { Chart } from "react-chartjs-2";
 
 ChartJS.register(...Registerables);
-
-type Props = {
-  store: Record<string, any>;
-  mode: "newCases" | "newDeaths";
-};
 
 const chartColorOptions = {
   newCases: {
@@ -32,7 +24,11 @@ const dateFormatter = (dateStr: string) => {
   return formattedDate;
 };
 
-export default function ChartContainer({ mode, store }: Props) {
+export default function ChartContainer(props: {
+  store: Record<string, any>;
+  mode: "newCases" | "newDeaths";
+}) {
+  const { store, mode } = props;
   const options = {
     responsive: true,
     plugins: {
