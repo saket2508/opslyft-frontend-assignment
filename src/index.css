@@ -96,3 +96,7 @@ code {
   padding-bottom: 8px;
   padding-right: 15px;
 }
+
+.hoverCell:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}

@@ -51,20 +51,27 @@ export default function TableCountries(props: {
   } = props;
   return (
     <div className="table-responsive">
-      <table className="table table-striped table-hover table-borderless">
-        <thead className="table-secondary">
+      <table className="table table-hover table-bordered">
+        <thead className="table-light">
           <tr className="text-sm">
             <th scope="col">
               <small>#</small>
             </th>
             {Object.keys(sortedKeys).map((keyName, idx) => (
-              <th scope="col" key={idx} onClick={() => handleSortKeyChange(keyName)}>
-                <small>{getLabel(keyName)}</small>
-                {sortedKeys[keyName].isSorted && (
-                  <span className="text-secondary ps-1">
-                    {getSortedIcon(sortedKeys[keyName].isAscending)}
-                  </span>
-                )}
+              <th
+                scope="col"
+                key={idx}
+                onClick={() => handleSortKeyChange(keyName)}
+                className='hoverCell'
+              >
+                <div className="d-flex align-items-center">
+                  <small>{getLabel(keyName)}</small>
+                  {sortedKeys[keyName].isSorted && (
+                    <span className="text-secondary ps-1">
+                      {getSortedIcon(sortedKeys[keyName].isAscending)}
+                    </span>
+                  )}
+                </div>
               </th>
             ))}
           </tr>
