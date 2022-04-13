@@ -18,7 +18,7 @@ export default function SummaryStats(props: {
         <div className="d-flex flex-column align-items-center px-4 semibold text-muted">
           <small>Deceased</small>
           <p className="fw-bold mb-0">
-            {formatter.format(countrySummary["deaths"])}
+            {formatter.format(countrySummary["deceased"])}
           </p>
           {countrySummary["newCases"] > 0 && (
             <small>+ {formatter.format(countrySummary["newDeaths"])}</small>

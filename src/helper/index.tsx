@@ -1,6 +1,6 @@
 import { timezones } from "./timezones";
 
-export const fetchGeolocation = async(): Promise<string> => {
+export const fetchUserCountry = async(): Promise<string> => {
   // logic for fetching user country
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if(!userTimezone || userTimezone === null) {
@@ -18,7 +18,7 @@ export const fetchWorldData = async(): Promise<Record<string, any>> => {
   const responseData = await res.json();
   const worldData = {
     'confirmed': responseData['cases'],
-    'deaths': responseData['deaths'],  
+    'deceased': responseData['deaths'],  
     'recovered': responseData['recovered'],  
   }
   const updatedTimeStamp = responseData['updated'];
@@ -43,7 +43,7 @@ export const fetchCountries = async (): Promise<Record<string, any>> => {
     'name': getCountryName(item['country']),
     'confirmed': item['cases'],
     'newCases': item['todayCases'],
-    'deaths': item['deaths'],
+    'deceased': item['deaths'],
     'newDeaths': item['todayDeaths'],
     'recovered': item['recovered'],
     'iso': item['countryInfo']['iso2'],

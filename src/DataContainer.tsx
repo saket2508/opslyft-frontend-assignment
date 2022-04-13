@@ -4,7 +4,7 @@ import TableCountries from "./components/TableCountries";
 import PaginationControl from "./components/PaginationControl";
 import {
   fetchCountries,
-  fetchGeolocation,
+  fetchUserCountry,
   fetchTimeSeriesData,
   fetchWorldData,
 } from "./helper";
@@ -26,7 +26,7 @@ export default function DataContainer() {
   const [pageSize, setPageSize] = React.useState<number>(10);
   const [isSearching, setIsSearching] = React.useState<boolean>(false);
   const [search, setSearch] = React.useState<string>("");
-  const [selectedCountry, setSelectedCountry] = React.useState<string>('');
+  const [selectedCountry, setSelectedCountry] = React.useState<string>("");
   const [listCountries, setListCountries] = React.useState<Array<string>>([]);
   const [countrySummary, setCountrySummary] = React.useState<
     Record<string, any>
@@ -44,6 +44,25 @@ export default function DataContainer() {
   );
   const [updatedTimeStamp, setUpdatedTimeStamp] = React.useState<string>("");
 
+  const [sortedKeys, setSortedKeys] = React.useState<Record<string, any>>({
+    name: {
+      isSorted: false,
+      isAscending: false,
+    },
+    confirmed: {
+      isSorted: true,
+      isAscending: false,
+    },
+    deceased: {
+      isSorted: false,
+      isAscending: false,
+    },
+    recovered: {
+      isSorted: false,
+      isAscending: false,
+    },
+  });
+
   React.useEffect(() => {
     (async () => {
       try {
@@ -56,7 +75,7 @@ export default function DataContainer() {
   }, []);
 
   React.useEffect(() => {
-    if(isLoading) {
+    if (isLoading) {
       return;
     }
     (async () => {
@@ -65,13 +84,11 @@ export default function DataContainer() {
           (country: any) => country["name"] === selectedCountry
         );
         setCountrySummary(countrySummary);
-        const countryCode = countrySummary['iso'];
-        const timeSeriesData = await fetchTimeSeriesData(
-          countryCode
-        );
+        const countryCode = countrySummary["iso"];
+        const timeSeriesData = await fetchTimeSeriesData(countryCode);
         setTimeSeriesData(timeSeriesData);
       } catch (error) {
-        console.error('Could not get time series data');
+        console.error("Could not get time series data");
       }
     })();
   }, [selectedCountry]);
@@ -79,18 +96,19 @@ export default function DataContainer() {
   const fetchData = async () => {
     const { dataCountries } = await fetchCountries();
     const { worldData, updatedTimeStamp } = await fetchWorldData();
-    const userCountry = await fetchGeolocation();
+    const userCountry = await fetchUserCountry();
     const timeSeriesData = await fetchTimeSeriesData(userCountry);
-    const listCountries: Array<string> = [];
-    dataCountries.forEach((countryObj: any) => {
-      let countryName = countryObj['name'];
-      let countryCode = countryObj['iso'];
-      listCountries.push(countryName);
-    });
-    listCountries.sort();
-    const countrySummary = dataCountries.find((country: any) => country['iso'] === userCountry);
-    const tabularData = dataCountries.slice(startIndex - 1, currPage * pageSize);
-    setSelectedCountry(countrySummary['name']);
+    const listCountries = dataCountries
+      .map((country: any) => country.name)
+      .sort();
+    const countrySummary = dataCountries.find(
+      (country: any) => country["iso"] === userCountry
+    );
+    const tabularData = dataCountries.slice(
+      startIndex - 1,
+      currPage * pageSize
+    );
+    setSelectedCountry(countrySummary["name"]);
     setTimeSeriesData(timeSeriesData);
     setWorldSummary(worldData);
     setCountrySummary(countrySummary);
@@ -168,6 +186,29 @@ export default function DataContainer() {
     setTabularData(records);
   };
 
+  const handleSortKeyChange = (keyName: string) => {
+    const sortedOrder = { ...sortedKeys };
+    Object.keys(sortedOrder).forEach((item) => {
+      if (item === keyName) {
+        sortedOrder[item].isSorted = true;
+        sortedOrder[item].isAscending = !sortedOrder[item].isAscending;
+      } else {
+        sortedOrder[item].isSorted = false;
+        sortedOrder[item].isAscending = false;
+      }
+    });
+    const orderedRows = [...dataCountries];
+    orderedRows.sort((a, b) =>
+      sortedOrder[keyName].isAscending
+        ? a[keyName] < b[keyName] ? -1 : 0
+        : b[keyName] < a[keyName] ? -1 : 0
+    );
+    const records = orderedRows.slice(startIndex - 1, endIndex);
+    setSortedKeys(sortedOrder);
+    setDataCountries(orderedRows);
+    setTabularData(records);
+  };
+
   function getLastUpdatedDate() {
     let updatedDate = new Date(updatedTimeStamp).toDateString();
     let sub = updatedDate.split(" ");
@@ -211,7 +252,11 @@ export default function DataContainer() {
       <small className="text-secondary semibold mb-3">
         Updated {getLastUpdatedDate()}
       </small>
-      <SearchBar listCountries={listCountries} selectCountry={selectCountry} selectedCountry={selectedCountry}/>
+      <SearchBar
+        listCountries={listCountries}
+        selectCountry={selectCountry}
+        selectedCountry={selectedCountry}
+      />
       <SummaryStats countrySummary={countrySummary} formatter={formatter} />
       <div className="col-sm-8 col-12 mb-4 px-2">
         <p className="h6 fw-bold">
@@ -253,6 +298,8 @@ export default function DataContainer() {
           />
         </div>
         <TableCountries
+          sortedKeys={sortedKeys}
+          handleSortKeyChange={handleSortKeyChange}
           isSearching={isSearching}
           worldSummary={worldSummary}
           tabularData={tabularData}
